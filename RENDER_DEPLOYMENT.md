@@ -51,8 +51,9 @@ Click "Create Web Service" to start the deployment process.
    - Ensure your Dockerfile is in the root of your repository
    - Check that all necessary files are included and not excluded in .dockerignore
 
-2. **Missing build scripts**:
-   - The Dockerfile now uses a multi-stage build process to properly build both frontend and backend
+2. **Missing files during build**:
+   - The Dockerfile has been updated to only copy files that actually exist in the project
+   - Make sure your repository structure matches the expected format
 
 3. **Database issues**:
    - The application uses SQLite for simplicity, which works well on Render

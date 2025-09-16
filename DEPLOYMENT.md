@@ -219,7 +219,7 @@ Access the application:
    - Make sure Dockerfile exists in the project root
    - Check that .dockerignore is properly configured
    - Verify that all necessary files are included in the build context
-   - The new multi-stage Dockerfile should resolve the "Missing script: build" error
+   - The updated multi-stage Dockerfile should resolve file path issues
 
 ### Checking Deployment Status
 

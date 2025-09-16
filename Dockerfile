@@ -2,19 +2,19 @@
 FROM node:18-alpine AS frontend-builder
 
 # Build frontend
-WORKDIR /app/frontend
-COPY frontend/package*.json ./
-RUN npm ci
-COPY frontend/ .
-RUN npm run build
+WORKDIR /app
+COPY frontend/package*.json ./frontend/
+RUN cd frontend && npm ci
+COPY frontend/ ./frontend/
+RUN cd frontend && npm run build
 
 # Build backend
 FROM node:18-alpine AS backend-builder
-WORKDIR /app/backend
-COPY backend/package*.json ./
-RUN npm ci
-COPY backend/ .
-RUN npm run build
+WORKDIR /app
+COPY backend/package*.json ./backend/
+RUN cd backend && npm ci
+COPY backend/ ./backend/
+RUN cd backend && npm run build
 
 # Production stage
 FROM node:18-alpine
@@ -28,8 +28,6 @@ COPY --from=frontend-builder /app/frontend/public ./frontend/public
 # Copy backend build
 COPY --from=backend-builder /app/backend/dist ./backend/dist
 COPY --from=backend-builder /app/backend/package*.json ./backend/
-COPY --from=backend-builder /app/backend/src/views ./backend/src/views
-COPY --from=backend-builder /app/backend/src/db/schema.sql ./backend/src/db/
 
 # Install production dependencies for both
 WORKDIR /app/frontend
