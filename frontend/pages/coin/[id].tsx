@@ -9,20 +9,20 @@ import { coinsAPI, userAPI } from '@/services/api';
 import { useAuth } from '@/context/AuthContext';
 
 interface CoinDetailsProps {
-  initialCoin: Coin;
+  initialCoin?: Coin;
   initialChartData?: any[];
 }
 
 export default function CoinDetails({ initialCoin, initialChartData }: CoinDetailsProps) {
   const router = useRouter();
   const { isAuthenticated } = useAuth();
-  const [coin, setCoin] = useState<Coin>(initialCoin);
+  const [coin, setCoin] = useState<Coin | null>(initialCoin || null);
   const [chartData, setChartData] = useState<any[]>(initialChartData || []);
   const [loading, setLoading] = useState(false);
   const [showPortfolioForm, setShowPortfolioForm] = useState(false);
   const [portfolioData, setPortfolioData] = useState({
     amount: 1,
-    purchasePrice: initialCoin.current_price || 0
+    purchasePrice: initialCoin?.current_price || 0
   });
   const coinIdRef = useRef<string | null>(null);
 
@@ -85,6 +85,8 @@ export default function CoinDetails({ initialCoin, initialChartData }: CoinDetai
       return;
     }
 
+    if (!coin) return;
+
     try {
       await userAPI.addFavorite(coin.id);
       window.alert('Favorilere eklendi!');
@@ -100,6 +102,8 @@ export default function CoinDetails({ initialCoin, initialChartData }: CoinDetai
       return;
     }
     
+    if (!coin) return;
+    
     // Set default purchase price to current price if not set
     setPortfolioData({
       amount: 1,
@@ -110,6 +114,8 @@ export default function CoinDetails({ initialCoin, initialChartData }: CoinDetai
 
   const handlePortfolioFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!coin) return;
     
     try {
       await userAPI.addToPortfolio({
@@ -167,7 +173,7 @@ export default function CoinDetails({ initialCoin, initialChartData }: CoinDetai
   }
 
   // Check if coin data is available
-  if (!coin || !coin.id) {
+  if (!coin) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
@@ -211,7 +217,9 @@ export default function CoinDetails({ initialCoin, initialChartData }: CoinDetai
                     Kripto Para
                   </label>
                   <div className="flex items-center">
-                    <img className="h-8 w-8 rounded-full mr-2" src={coin.image} alt={coin.name} />
+                    {coin.image && (
+                      <img className="h-8 w-8 rounded-full mr-2" src={coin.image} alt={coin.name} />
+                    )}
                     <span className="text-gray-900 dark:text-white">{coin.name} ({coin.symbol?.toUpperCase()})</span>
                   </div>
                 </div>
@@ -398,68 +406,23 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
     // Get coin data based on the id
     const coinId = params?.id as string;
     
-    // Try to fetch real data from the API
-    try {
-      const response = await coinsAPI.getCoinById(coinId);
-      
-      // Process the API response
-      const coinData: Coin = {
-        id: response.data.id || coinId,
-        symbol: response.data.symbol || '',
-        name: response.data.name || coinId.charAt(0).toUpperCase() + coinId.slice(1),
-        image: response.data.image || '',
-        current_price: response.data.current_price !== undefined ? response.data.current_price : 0,
-        price_change_percentage_24h: response.data.price_change_percentage_24h || 0,
-        market_cap: response.data.market_cap || 0,
-        total_volume: response.data.total_volume || 0
-      };
-      
-      // Process chart data if available
-      let chartData: any[] = [];
-      if (response.data.market_chart && response.data.market_chart.prices) {
-        chartData = response.data.market_chart.prices.map((price: any) => ({
-          time: new Date(price[0]).toLocaleTimeString('tr-TR', { 
-            hour: '2-digit', 
-            minute: '2-digit' 
-          }),
-          price: price[1]
-        }));
-      }
-      
-      return {
-        props: {
-          initialCoin: coinData,
-          initialChartData: chartData,
-        },
-        revalidate: 60, // Revalidate at most once every 60 seconds
-      };
-    } catch (apiError) {
-      // If API fails, use fallback mock data
-      console.warn('API request failed, using fallback data:', apiError);
-      
-      const mockCoin: Coin = {
-        id: coinId,
-        symbol: coinId.slice(0, 3),
-        name: coinId.charAt(0).toUpperCase() + coinId.slice(1),
-        image: `https://assets.coingecko.com/coins/images/1/large/bitcoin.png?1547033579`,
-        current_price: 0,
-        price_change_percentage_24h: 0,
-        market_cap: 0,
-        total_volume: 0
-      };
-      
-      return {
-        props: {
-          initialCoin: mockCoin,
-          initialChartData: [],
-        },
-        revalidate: 60,
-      };
-    }
+    // Return empty props for static generation
+    // The actual data will be fetched client-side
+    return {
+      props: {
+        initialCoin: null,
+        initialChartData: [],
+      },
+      revalidate: 60, // Revalidate at most once every 60 seconds
+    };
   } catch (error) {
     console.error('Error in getStaticProps:', error);
     return {
-      notFound: true,
+      props: {
+        initialCoin: null,
+        initialChartData: [],
+      },
+      revalidate: 60,
     };
   }
 };

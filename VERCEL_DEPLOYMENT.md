@@ -113,6 +113,7 @@ After setting the environment variables, you need to redeploy:
    - Make sure to add proper null/undefined checks in your components
    - Use fallback values in getStaticProps for dynamic routes
    - Set fallback: 'blocking' in getStaticPaths for better handling of non-pre-rendered paths
+   - For complex dynamic routes, consider using getServerSideProps instead of getStaticProps
 
 ### Checking Deployment Status
 
@@ -139,6 +140,7 @@ After setting the environment variables, you need to redeploy:
 3. **Fallback Data**: The backend provides demo data when the CoinGecko API is not accessible
 4. **CORS Configuration**: The backend is configured to handle CORS properly for various origins
 5. **Dynamic Routes**: For dynamic routes like `/coin/[id]`, always implement proper error handling and fallback mechanisms to prevent build errors
+6. **Static Generation**: For pages that require dynamic data, consider using client-side fetching instead of static generation to avoid build errors
 
 ## Updating Your Deployment
 
@@ -247,3 +249,5 @@ For dynamic routes like `/coin/[id]`:
 3. Implement null/undefined checks before accessing object properties
 4. Set fallback: 'blocking' in getStaticPaths for better handling
 5. Provide meaningful error messages to users when data is not available
+6. For complex dynamic routes that require real-time data, consider using client-side fetching instead of static generation
+7. Return minimal data in getStaticProps and fetch detailed data on the client side
