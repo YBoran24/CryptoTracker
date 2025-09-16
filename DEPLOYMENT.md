@@ -131,6 +131,7 @@ vercel
 | DATABASE_URL | Database connection string | sqlite:./cryptotracker.db |
 | JWT_SECRET | Secret key for JWT tokens | your_secret_key_here |
 | FRONTEND_URL | URL of the frontend application | https://your-frontend.vercel.app |
+| PORT | Port for the backend server (set by platform) | 5003 |
 | COINGECKO_API_KEY | Optional CoinGecko API key | your_api_key_here |
 
 ### Frontend Environment Variables
@@ -220,6 +221,11 @@ Access the application:
    - Check that .dockerignore is properly configured
    - Verify that all necessary files are included in the build context
    - The updated multi-stage Dockerfile should resolve file path issues
+
+5. **Port in Use Errors (EADDRINUSE)**
+   - The application is now configured to use the PORT environment variable provided by the deployment platform
+   - Make sure you're not hardcoding ports in your application
+   - In containerized environments, applications should listen on the PORT environment variable
 
 ### Checking Deployment Status
 

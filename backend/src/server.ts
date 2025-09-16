@@ -74,10 +74,11 @@ app.get('/health', (req, res) => {
 });
 
 // Start server
-const PORT = process.env.PORT || 5003; // Portu 5003 olarak değiştirdik
-server.listen(PORT, () => {
+// Use PORT environment variable provided by container platform, fallback to 5003
+const PORT = parseInt(process.env.PORT || '5003', 10);
+server.listen(PORT, '0.0.0.0', () => {
   console.log(`Server is running on port ${PORT}`);
-  console.log(`API endpoints available at http://localhost:${PORT}/api`);
+  console.log(`API endpoints available at http://0.0.0.0:${PORT}/api`);
 });
 
 export default app;

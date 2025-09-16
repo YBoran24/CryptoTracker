@@ -39,7 +39,15 @@ FRONTEND_URL=https://your-frontend-service.onrender.com
 
 Note: Replace `your-backend-service.onrender.com` and `your-frontend-service.onrender.com` with your actual service URLs after deployment.
 
-### 3. Deploy
+### 3. Configure Port Settings
+
+In the "Advanced" section, you can also specify custom port settings if needed:
+- For backend: Set the internal port to 5003 (or let Render auto-detect)
+- For frontend: Set the internal port to 3000 (or let Render auto-detect)
+
+Render will automatically set the PORT environment variable, and our application is configured to use this variable.
+
+### 4. Deploy
 
 Click "Create Web Service" to start the deployment process.
 
@@ -51,22 +59,22 @@ Click "Create Web Service" to start the deployment process.
    - Ensure your Dockerfile is in the root of your repository
    - Check that all necessary files are included and not excluded in .dockerignore
 
-2. **Missing files during build**:
+2. **Port in use errors (EADDRINUSE)**:
+   - The application is now configured to use the PORT environment variable provided by Render
+   - Make sure you're not hardcoding ports in your application
+   - If deploying frontend and backend separately, ensure they use different ports
+
+3. **Missing files during build**:
    - The Dockerfile has been updated to only copy files that actually exist in the project
    - Make sure your repository structure matches the expected format
 
-3. **Database issues**:
+4. **Database issues**:
    - The application uses SQLite for simplicity, which works well on Render
    - Data will persist as long as the service is not destroyed
 
-4. **CORS errors**:
+5. **CORS errors**:
    - Ensure `FRONTEND_URL` environment variable is set correctly in your backend
    - The backend is configured to accept requests from the frontend URL
-
-5. **Port configuration**:
-   - The frontend runs on port 3000
-   - The backend runs on port 5003
-   - Both are exposed in the Dockerfile
 
 ## Post-Deployment Steps
 
