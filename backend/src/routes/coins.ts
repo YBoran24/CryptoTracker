@@ -11,28 +11,9 @@ const demoCoins = [
     name: "Bitcoin",
     image: "https://assets.coingecko.com/coins/images/1/large/bitcoin.png?1547033579",
     current_price: 27150,
-    market_cap: 528000000000,
-    market_cap_rank: 1,
-    fully_diluted_valuation: 570000000000,
-    total_volume: 12000000000,
-    high_24h: 27500,
-    low_24h: 26800,
-    price_change_24h: 350,
     price_change_percentage_24h: 1.31,
-    market_cap_change_24h: 6800000000,
-    market_cap_change_percentage_24h: 1.31,
-    circulating_supply: 19450000,
-    total_supply: 21000000,
-    max_supply: 21000000,
-    ath: 69045,
-    ath_change_percentage: -60.65,
-    ath_date: "2021-11-10T14:24:11.849Z",
-    atl: 67.81,
-    atl_change_percentage: 39920.83,
-    atl_date: "2013-07-06T00:00:00.000Z",
-    roi: null,
-    last_updated: "2023-06-01T12:00:00.000Z",
-    price_change_percentage_24h_in_currency: 1.31
+    market_cap: 528000000000,
+    total_volume: 12000000000
   },
   {
     id: "ethereum",
@@ -40,32 +21,9 @@ const demoCoins = [
     name: "Ethereum",
     image: "https://assets.coingecko.com/coins/images/279/large/ethereum.png?1595348880",
     current_price: 1680,
-    market_cap: 202000000000,
-    market_cap_rank: 2,
-    fully_diluted_valuation: 202000000000,
-    total_volume: 6500000000,
-    high_24h: 1700,
-    low_24h: 1650,
-    price_change_24h: -20,
     price_change_percentage_24h: -1.18,
-    market_cap_change_24h: -2400000000,
-    market_cap_change_percentage_24h: -1.18,
-    circulating_supply: 120200000,
-    total_supply: 120200000,
-    max_supply: null,
-    ath: 4878.26,
-    ath_change_percentage: -65.57,
-    ath_date: "2021-11-10T14:24:19.604Z",
-    atl: 0.432979,
-    atl_change_percentage: 387800,
-    atl_date: "2015-10-20T00:00:00.000Z",
-    roi: {
-      times: 84.05,
-      currency: "btc",
-      percentage: 8405.06
-    },
-    last_updated: "2023-06-01T12:00:00.000Z",
-    price_change_percentage_24h_in_currency: -1.18
+    market_cap: 202000000000,
+    total_volume: 6500000000
   },
   {
     id: "cardano",
@@ -73,28 +31,9 @@ const demoCoins = [
     name: "Cardano",
     image: "https://assets.coingecko.com/coins/images/975/large/cardano.png?1547034860",
     current_price: 0.25,
-    market_cap: 8900000000,
-    market_cap_rank: 8,
-    fully_diluted_valuation: 13500000000,
-    total_volume: 250000000,
-    high_24h: 0.255,
-    low_24h: 0.245,
-    price_change_24h: 0.005,
     price_change_percentage_24h: 2.04,
-    market_cap_change_24h: 180000000,
-    market_cap_change_percentage_24h: 2.04,
-    circulating_supply: 35600000000,
-    total_supply: 45000000000,
-    max_supply: 45000000000,
-    ath: 3.09,
-    ath_change_percentage: -91.91,
-    ath_date: "2021-09-02T06:00:15.325Z",
-    atl: 0.01949332,
-    atl_change_percentage: 1180.43,
-    atl_date: "2020-03-13T02:29:59.003Z",
-    roi: null,
-    last_updated: "2023-06-01T12:00:00.000Z",
-    price_change_percentage_24h_in_currency: 2.04
+    market_cap: 8900000000,
+    total_volume: 250000000
   }
 ];
 
@@ -111,6 +50,7 @@ router.get('/', async (req: Request, res: Response) => {
     console.error('Error in /coins route:');
     console.error('Error message:', error.message);
     console.error('Error code:', error.code);
+    console.error('Stack trace:', error.stack);
     
     if (error.response) {
       console.error('Response status:', error.response.status);
@@ -120,10 +60,19 @@ router.get('/', async (req: Request, res: Response) => {
         // Return demo data when rate limit is exceeded
         res.status(200).json(demoCoins);
       } else {
-        res.status(500).json({ message: 'Sunucu hatası oluştu' });
+        res.status(500).json({ 
+          message: 'Sunucu hatası oluştu',
+          error: error.message || 'Unknown error',
+          status: error.response.status
+        });
       }
+    } else if (error.code === 'ENOTFOUND' || error.code === 'ECONNABORTED' || error.code === 'ECONNREFUSED') {
+      // Network error - return demo data as fallback
+      console.error('Network error, returning demo data');
+      res.status(200).json(demoCoins);
     } else {
-      // Return demo data when there's a network error
+      // Other errors - return demo data as fallback
+      console.error('Other error, returning demo data');
       res.status(200).json(demoCoins);
     }
   }
@@ -148,6 +97,7 @@ router.get('/:id', async (req: Request, res: Response) => {
     console.error(`Error in /coins/${req.params.id} route:`);
     console.error('Error message:', error.message);
     console.error('Error code:', error.code);
+    console.error('Stack trace:', error.stack);
     
     if (error.response) {
       console.error('Response status:', error.response.status);
@@ -161,10 +111,23 @@ router.get('/:id', async (req: Request, res: Response) => {
           retryAfter: error.response.headers['retry-after']
         });
       } else {
-        res.status(500).json({ message: 'Sunucu hatası oluştu' });
+        res.status(500).json({ 
+          message: 'Sunucu hatası oluştu',
+          error: error.message || 'Unknown error',
+          status: error.response.status
+        });
       }
+    } else if (error.code === 'ENOTFOUND' || error.code === 'ECONNABORTED' || error.code === 'ECONNREFUSED') {
+      // Network error
+      res.status(503).json({ 
+        message: 'Harici API şu anda erişilemiyor. Lütfen daha sonra tekrar deneyin.',
+        error: error.message || 'Network error'
+      });
     } else {
-      res.status(500).json({ message: 'Sunucu hatası oluştu' });
+      res.status(500).json({ 
+        message: 'Sunucu hatası oluştu',
+        error: error.message || 'Unknown error'
+      });
     }
   }
 });

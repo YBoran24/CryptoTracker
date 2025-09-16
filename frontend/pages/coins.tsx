@@ -25,21 +25,29 @@ export default function Coins() {
       if (response.status === 429) {
         setError('API rate limit aşıldı. Lütfen birkaç dakika sonra tekrar deneyin.');
       } else {
-        setCoins(response.data);
-        setFilteredCoins(response.data);
+        setCoins(response.data || []);
+        setFilteredCoins(response.data || []);
       }
       setLoading(false);
     } catch (err: any) {
       console.error('Error fetching coins:', err);
       
+      // More detailed error handling
       if (err.response) {
         if (err.response.status === 429) {
           setError('API rate limit aşıldı. Lütfen birkaç dakika sonra tekrar deneyin.');
+        } else if (err.response.status === 500) {
+          setError(`Sunucu hatası oluştu: ${err.response.data?.message || err.response.data?.error || 'Bilinmeyen sunucu hatası'}`);
+        } else if (err.response.status === 503) {
+          setError(`Hizmet kullanılamıyor: ${err.response.data?.message || 'Harici API şu anda erişilemiyor'}`);
         } else {
-          setError('Kripto paralar verisi alınamadı: ' + (err.response.data?.message || 'Bilinmeyen hata'));
+          setError(`Kripto paralar verisi alınamadı: ${err.response.data?.message || err.response.data?.error || 'Bilinmeyen hata'}`);
         }
+      } else if (err.request) {
+        // Network error (no response received)
+        setError('Sunucuya bağlanılamadı. Lütfen internet bağlantınızı kontrol edin veya daha sonra tekrar deneyin.');
       } else {
-        setError('Kripto paralar verisi alınamadı. Lütfen internet bağlantınızı kontrol edin.');
+        setError(`Kripto paralar verisi alınamadı: ${err.message || 'Bilinmeyen hata'}`);
       }
       setLoading(false);
     }
@@ -101,8 +109,8 @@ export default function Coins() {
       setFilteredCoins(coins);
     } else {
       const filtered = coins.filter(coin => 
-        coin.name.toLowerCase().includes(query.toLowerCase()) || 
-        coin.symbol.toLowerCase().includes(query.toLowerCase())
+        (coin.name && coin.name.toLowerCase().includes(query.toLowerCase())) || 
+        (coin.symbol && coin.symbol.toLowerCase().includes(query.toLowerCase()))
       );
       setFilteredCoins(filtered);
     }
@@ -133,7 +141,12 @@ export default function Coins() {
             </div>
           ) : error ? (
             <div className="text-center py-8">
-              <p className="text-red-500 mb-4">{error}</p>
+              <div className="text-red-500 mb-4">
+                <p>{error}</p>
+                {error.includes('Bilinmeyen hata') && (
+                  <p className="text-sm mt-2">Lütfen backend sunucunuzun çalıştığını ve doğru şekilde yapılandırıldığını kontrol edin.</p>
+                )}
+              </div>
               <div className="flex flex-col items-center">
                 <button 
                   onClick={handleRetry}

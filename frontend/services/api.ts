@@ -3,7 +3,7 @@ import axios from 'axios';
 // Create axios instance with default config
 const api = axios.create({
   baseURL: process.env.BACKEND_URL || 'http://localhost:5003/api',
-  timeout: 10000,
+  timeout: 15000, // Increased timeout
   headers: {
     'Content-Type': 'application/json',
   },
@@ -29,10 +29,12 @@ api.interceptors.response.use(
     return response;
   },
   (error) => {
+    // Log the error for debugging
+    console.error('API Error:', error);
+    
     // Only redirect to login for specific routes that require authentication
     if (error.response?.status === 401) {
       const requiresAuth = [
-        
         '/user/portfolio'
       ];
       

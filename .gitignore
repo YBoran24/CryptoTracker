@@ -100,3 +100,72 @@ docker-compose.override.yml
 config.json
 database.json
 secrets.json
+
+# CryptoTracker specific sensitive files
+backend/.env
+frontend/.env.local
+.env.example
+backend/src/config/
+backend/src/secrets/
+.env.*
+
+# Vercel specific
+.vercel/
+.vercelignore
+
+# API keys and secrets
+*.key
+*.pem
+*.crt
+*.cer
+*.der
+*.p12
+*.pfx
+
+# SSH keys
+ssh/
+*.ssh
+id_rsa
+id_dsa
+id_ecdsa
+id_ed25519
+
+# Database credentials
+database.yml
+db.conf
+db_config.json
+
+# Cloud provider credentials
+*.aws
+*.gcp
+*.azure
+credentials.json
+service-account-key.json
+
+# Session files
+*.session
+
+# Backup files
+*.bak
+*.backup
+*.old
+
+# Swap files
+*.swp
+*.swo
+
+# Lock files that might contain version info
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# IDE specific
+*.idea/
+*.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# OS specific
+.DS_Store
+Thumbs.db
+desktop.ini

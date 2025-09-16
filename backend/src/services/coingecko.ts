@@ -16,7 +16,7 @@ const CACHE_DURATION = 60000; // 1 minute cache
 // Create axios instance with default config
 const api = axios.create({
   baseURL: COINGECKO_API_URL,
-  timeout: 10000,
+  timeout: 15000, // Increased timeout
 });
 
 // Add API key to requests if available
@@ -99,9 +99,9 @@ export const getTopCoins = async (page: number = 1, perPage: number = 100) => {
     
     // Process the response to ensure image is a string and numeric values are properly handled
     const processedData = response.data.map((coin: any) => ({
-      id: coin.id,
-      symbol: coin.symbol,
-      name: coin.name,
+      id: coin.id || '',
+      symbol: coin.symbol || '',
+      name: coin.name || '',
       image: extractImageUrl(coin.image),
       current_price: extractNumericValue(coin.current_price),
       price_change_percentage_24h: extractNumericValue(coin.price_change_percentage_24h),
@@ -119,9 +119,17 @@ export const getTopCoins = async (page: number = 1, perPage: number = 100) => {
     console.error('Status Text:', error.response?.statusText);
     console.error('Headers:', error.response?.headers);
     console.error('Data:', error.response?.data);
+    console.error('Message:', error.message);
+    console.error('Code:', error.code);
+    console.error('Stack trace:', error.stack);
     
-    // Re-throw the error so it can be handled by the calling function
-    throw error;
+    // Throw a more descriptive error
+    if (error.code === 'ENOTFOUND' || error.code === 'ECONNABORTED' || error.code === 'ECONNREFUSED') {
+      throw new Error('CoinGecko API is not accessible. Network error occurred.');
+    }
+    
+    // For other errors, provide a generic message
+    throw new Error('Failed to fetch cryptocurrency data from CoinGecko API.');
   }
 };
 
@@ -152,9 +160,9 @@ export const getCoinById = async (id: string) => {
     
     // Process the response to ensure image is a string and numeric values are properly handled
     const processedData = {
-      id: response.data.id,
-      symbol: response.data.symbol,
-      name: response.data.name,
+      id: response.data.id || id,
+      symbol: response.data.symbol || '',
+      name: response.data.name || '',
       image: extractImageUrl(response.data.image),
       current_price: extractNumericValue(marketData.current_price?.usd),
       price_change_percentage_24h: extractNumericValue(marketData.price_change_percentage_24h),
@@ -172,6 +180,13 @@ export const getCoinById = async (id: string) => {
     console.error('Status Text:', error.response?.statusText);
     console.error('Headers:', error.response?.headers);
     console.error('Data:', error.response?.data);
+    console.error('Message:', error.message);
+    console.error('Code:', error.code);
+    
+    // Throw a more descriptive error
+    if (error.code === 'ENOTFOUND' || error.code === 'ECONNABORTED' || error.code === 'ECONNREFUSED') {
+      throw new Error(`CoinGecko API is not accessible for coin ${id}. Network error occurred.`);
+    }
     
     // Re-throw the error so it can be handled by the calling function
     throw error;
@@ -206,6 +221,13 @@ export const getCoinMarketChart = async (id: string, days: number = 7) => {
     console.error('Status Text:', error.response?.statusText);
     console.error('Headers:', error.response?.headers);
     console.error('Data:', error.response?.data);
+    console.error('Message:', error.message);
+    console.error('Code:', error.code);
+    
+    // Throw a more descriptive error
+    if (error.code === 'ENOTFOUND' || error.code === 'ECONNABORTED' || error.code === 'ECONNREFUSED') {
+      throw new Error(`CoinGecko API is not accessible for chart data of ${id}. Network error occurred.`);
+    }
     
     // Re-throw the error so it can be handled by the calling function
     throw error;
