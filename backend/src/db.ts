@@ -60,6 +60,25 @@ db.serialize(() => {
       console.log('Portfolio table created successfully');
     }
   });
+  
+  // Create indexes for better performance
+  db.run(`CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)`, (err) => {
+    if (err) {
+      console.error('Error creating index on users.email:', err.message);
+    }
+  });
+  
+  db.run(`CREATE INDEX IF NOT EXISTS idx_favorites_user_id ON favorites(user_id)`, (err) => {
+    if (err) {
+      console.error('Error creating index on favorites.user_id:', err.message);
+    }
+  });
+  
+  db.run(`CREATE INDEX IF NOT EXISTS idx_portfolio_user_id ON portfolio(user_id)`, (err) => {
+    if (err) {
+      console.error('Error creating index on portfolio.user_id:', err.message);
+    }
+  });
 });
 
 export default db;

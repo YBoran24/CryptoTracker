@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: cryptotracker-backend
+    env: node
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: DATABASE_URL
+        value: sqlite:./cryptotracker.db
+      - key: JWT_SECRET
+        sync: false  # This will need to be set manually in the Render dashboard
+      - key: FRONTEND_URL
+        sync: false  # This will need to be set manually in the Render dashboard
