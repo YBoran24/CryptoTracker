@@ -46,8 +46,8 @@ npm run dev
 2. Create a new Web Service
 3. Connect your GitHub repository
 4. Set the following values:
-   - Build command: `npm install`
-   - Start command: `npm start`
+   - Environment: Docker
+   - Dockerfile path: Dockerfile (root of repository)
    - Environment variables:
      ```env
      DATABASE_URL=sqlite:./cryptotracker.db
@@ -62,7 +62,8 @@ npm run dev
 3. Connect your GitHub repository
 4. Set the following values:
    - Runtime: Node
-   - Build command: `npm install`
+   - Root directory: backend
+   - Build command: `npm run build`
    - Start command: `npm start`
    - Environment variables:
      ```env
@@ -118,8 +119,8 @@ vercel
 ```
 
 5. Set environment variables in Vercel dashboard:
-   - Name: `BACKEND_URL`
-   - Value: Your deployed backend URL (e.g., `https://your-backend-app.onrender.com`)
+   - Name: `NEXT_PUBLIC_API_URL`
+   - Value: Your deployed backend URL (e.g., `https://your-backend-app.onrender.com/api`)
 
 ## Environment Variables
 
@@ -136,7 +137,7 @@ vercel
 
 | Variable | Description | Example |
 |----------|-------------|---------|
-| BACKEND_URL | URL of the backend API | https://your-backend.onrender.com |
+| NEXT_PUBLIC_API_URL | URL of the backend API | https://your-backend.onrender.com/api |
 
 ## Database Information
 
@@ -154,21 +155,55 @@ The application creates the following tables:
 
 The application includes Docker support for local development and deployment:
 
-1. Build and run with Docker Compose:
+### Multi-stage Docker Build
+
+The root Dockerfile now uses a multi-stage build process to properly build both frontend and backend:
+
+1. Frontend build stage using Node 18 Alpine
+2. Backend build stage using Node 18 Alpine
+3. Production stage combining both builds
+
+To build and run with Docker:
+```bash
+docker build -t cryptotracker .
+docker run -p 3000:3000 -p 5003:5003 cryptotracker
+```
+
+### Separate Docker Builds
+
+You can also build frontend and backend separately:
+
+1. Frontend:
+```bash
+cd frontend
+docker build -t cryptotracker-frontend .
+docker run -p 3000:3000 cryptotracker-frontend
+```
+
+2. Backend:
+```bash
+cd backend
+docker build -t cryptotracker-backend .
+docker run -p 5003:5003 cryptotracker-backend
+```
+
+### Docker Compose
+
+For local development with both services:
 ```bash
 docker-compose up --build
 ```
 
-2. Access the application:
-   - Frontend: http://localhost:3000
-   - Backend API: http://localhost:5000/api
+Access the application:
+- Frontend: http://localhost:3000
+- Backend API: http://localhost:5003/api
 
 ## Troubleshooting
 
 ### Common Issues
 
 1. **"Kripto para veri bilgisi alınamadı" Error**
-   - Make sure your BACKEND_URL environment variable is set correctly in Vercel
+   - Make sure your NEXT_PUBLIC_API_URL environment variable is set correctly in Vercel
    - Ensure your backend is running and accessible
    - Check that CORS is properly configured in your backend
 
@@ -184,6 +219,7 @@ docker-compose up --build
    - Make sure Dockerfile exists in the project root
    - Check that .dockerignore is properly configured
    - Verify that all necessary files are included in the build context
+   - The new multi-stage Dockerfile should resolve the "Missing script: build" error
 
 ### Checking Deployment Status
 

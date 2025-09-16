@@ -38,6 +38,7 @@ CryptoTracker is a real-time cryptocurrency tracking application designed to hel
 ### Prerequisites
 - Node.js v16+
 - npm or yarn
+- Docker (optional, for containerized deployment)
 
 ### Installation
 
@@ -107,6 +108,17 @@ The application will be available at:
 
 See [DEPLOYMENT.md](DEPLOYMENT.md) for detailed deployment instructions.
 
+### Docker Deployment
+
+The application now includes a multi-stage Dockerfile for deployment:
+
+```bash
+docker build -t cryptotracker .
+docker run -p 3000:3000 -p 5003:5003 cryptotracker
+```
+
+This will run both the frontend (port 3000) and backend (port 5003) services in a single container.
+
 ## Project Structure
 
 ```
@@ -123,7 +135,9 @@ See [DEPLOYMENT.md](DEPLOYMENT.md) for detailed deployment instructions.
 │   ├── context        # Global state management
 │   ├── services       # API and WebSocket clients
 │   └── ...
-└── docker-compose.yml # Docker configuration
+├── Dockerfile         # Multi-stage Docker build
+├── docker-compose.yml # Docker configuration
+└── ...
 ```
 
 ## Contributing

@@ -1,146 +1,100 @@
-# Render Deployment Guide for CryptoTracker Backend
+# Render Deployment Guide
 
-This guide explains how to deploy the CryptoTracker backend to Render.
+This guide will help you deploy the CryptoTracker application to Render using Docker.
 
 ## Prerequisites
 
-1. A Render account (https://render.com)
-2. A GitHub account with the repository forked/cloned
-3. Node.js knowledge
+1. A Render account (free or paid tier)
+2. Your code pushed to a Git repository (GitHub, GitLab, or Bitbucket)
 
 ## Deployment Steps
 
 ### 1. Create a New Web Service on Render
 
 1. Go to your Render dashboard
-2. Click "New" and select "Web Service"
-3. Connect your GitHub repository
+2. Click "New" → "Web Service"
+3. Connect your Git repository
 4. Configure the service:
+   - **Name**: CryptoTracker
+   - **Region**: Choose your preferred region
+   - **Branch**: main (or your default branch)
+   - **Root Directory**: Leave empty (root of repository)
+   - **Environment**: Docker
+   - **Dockerfile Path**: Dockerfile (should be auto-detected)
+   - **Plan**: Free or paid as per your needs
 
-#### Service Settings
-- **Name**: `cryptotracker-backend`
-- **Region**: Choose the region closest to your users
-- **Branch**: `main` (or your default branch)
-- **Root Directory**: Leave empty (or `backend` if deploying from root)
+### 2. Configure Environment Variables
 
-#### Build Settings
-- **Runtime**: Node
-- **Build Command**: `npm install`
-- **Start Command**: `npm start`
+In the "Advanced" section, add these environment variables:
 
-### 2. Environment Variables
+```
+# Frontend variables
+NEXT_PUBLIC_API_URL=https://your-backend-service.onrender.com/api
 
-Add the following environment variables in the Render dashboard:
+# Backend variables
+DATABASE_URL=sqlite:./cryptotracker.db
+JWT_SECRET=your_jwt_secret_key_change_this_in_production
+FRONTEND_URL=https://your-frontend-service.onrender.com
+```
 
-| Variable | Value | Notes |
-|----------|-------|-------|
-| DATABASE_URL | `sqlite:./cryptotracker.db` | SQLite database file |
-| JWT_SECRET | `your_production_jwt_secret_here` | Change this to a strong secret |
-| FRONTEND_URL | `https://your-frontend.vercel.app` | Your Vercel frontend URL |
+Note: Replace `your-backend-service.onrender.com` and `your-frontend-service.onrender.com` with your actual service URLs after deployment.
 
-### 3. Advanced Settings (Optional)
+### 3. Deploy
 
-- **Auto-Deploy**: Enabled (recommended)
-- **Health Check Path**: `/health`
-- **Instance Count**: 1 (can be increased for production)
-
-### 4. Deploy
-
-1. Click "Create Web Service"
-2. Render will automatically start the deployment process
-3. Wait for the build and deployment to complete
-
-### 5. Verify Deployment
-
-1. Once deployed, visit your service URL
-2. Test the health endpoint: `https://your-service.onrender.com/health`
-3. Check the logs in the Render dashboard for any errors
+Click "Create Web Service" to start the deployment process.
 
 ## Troubleshooting
 
-### Common Issues
+### Common Issues and Solutions
 
-1. **"Module not found" errors**
-   - Ensure all dependencies are listed in package.json
-   - Check that the build command is correct
+1. **Docker build errors**:
+   - Ensure your Dockerfile is in the root of your repository
+   - Check that all necessary files are included and not excluded in .dockerignore
 
-2. **Database Connection Issues**
-   - Verify DATABASE_URL is set correctly
-   - For SQLite, ensure the file path is correct
+2. **Missing build scripts**:
+   - The Dockerfile now uses a multi-stage build process to properly build both frontend and backend
 
-3. **Environment Variables Not Set**
-   - Check that all required environment variables are added in the Render dashboard
-   - Make sure there are no extra spaces in the values
+3. **Database issues**:
+   - The application uses SQLite for simplicity, which works well on Render
+   - Data will persist as long as the service is not destroyed
 
-4. **Port Issues**
-   - Ensure your application listens on the port specified by the `PORT` environment variable
-   - In your server.ts file, use: `const PORT = process.env.PORT || 5003;`
+4. **CORS errors**:
+   - Ensure `FRONTEND_URL` environment variable is set correctly in your backend
+   - The backend is configured to accept requests from the frontend URL
 
-### Checking Logs
+5. **Port configuration**:
+   - The frontend runs on port 3000
+   - The backend runs on port 5003
+   - Both are exposed in the Dockerfile
 
-1. Go to your service in the Render dashboard
-2. Click on "Logs" tab
-3. Review recent logs for any error messages
+## Post-Deployment Steps
 
-### Health Check
+1. After deployment, note the URLs of your services:
+   - Frontend: https://your-service-name.onrender.com
+   - Backend API: https://your-service-name.onrender.com/api
 
-Render will periodically check your service health by accessing the health check path.
-Make sure your application responds correctly to GET requests at `/health`.
+2. Update the `FRONTEND_URL` and `NEXT_PUBLIC_API_URL` environment variables with the actual URLs if needed.
 
-## Scaling
+3. Test the application by:
+   - Visiting the frontend URL
+   - Checking that cryptocurrency data loads
+   - Testing user registration and login
+   - Verifying that the coin detail pages work correctly
 
-For production usage:
+## Scaling Considerations
 
-1. **Increase Instance Count**: In the "Settings" tab, increase instance count
-2. **Add Custom Domain**: In the "Settings" tab, add your custom domain
-3. **Enable SSL**: Render automatically provides SSL for custom domains
-4. **Set Up Alerts**: Configure notifications for deployment failures or performance issues
+For production use:
 
-## Environment Variables Reference
-
-### Required Variables
-- `DATABASE_URL`: Database connection string
-- `JWT_SECRET`: Secret key for JWT token generation
-- `FRONTEND_URL`: URL of your frontend application
-
-### Optional Variables
-- `COINGECKO_API_KEY`: CoinGecko API key for higher rate limits
-- `PORT`: Port to listen on (Render will set this automatically)
-
-## Best Practices
-
-1. **Security**
-   - Use strong, unique secrets for JWT_SECRET
-   - Never commit secrets to version control
-   - Rotate secrets periodically
-
-2. **Performance**
-   - Monitor your service's performance
-   - Use appropriate instance sizes for your traffic
-   - Consider caching for frequently accessed data
-
-3. **Monitoring**
-   - Set up logging and monitoring
-   - Configure alerts for critical issues
-   - Regularly review logs for potential issues
-
-4. **Backups**
-   - For production, consider using a managed database service with automatic backups
-   - For SQLite, ensure the database file is backed up regularly
-
-## Updating Your Deployment
-
-To update your deployment after making changes:
-
-1. Push your changes to GitHub
-2. Render will automatically start a new deployment (if auto-deploy is enabled)
-3. Or manually trigger a deployment from the Render dashboard
+1. **Database**: Consider migrating to PostgreSQL for better performance and data persistence
+2. **Environment Variables**: Use strong, unique secrets for JWT_SECRET in production
+3. **Custom Domain**: Add a custom domain in the Render dashboard
+4. **Health Checks**: Implement health check endpoints for better monitoring
 
 ## Support
 
-If you encounter issues not covered in this guide:
+If you encounter any issues during deployment:
 
-1. Check the [Render documentation](https://render.com/docs)
-2. Review your application logs
-3. Contact Render support if it's an infrastructure issue
-4. Check the application's error handling and logging
+1. Check the build logs in your Render dashboard
+2. Verify all environment variables are set correctly
+3. Ensure your repository structure matches the expected format
+4. Confirm that the Dockerfile is in the root directory
