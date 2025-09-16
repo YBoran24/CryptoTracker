@@ -108,10 +108,11 @@ After setting the environment variables, you need to redeploy:
    - Ensure your backend CORS configuration allows requests from your Vercel domain
    - Check that the FRONTEND_URL environment variable is set correctly in your backend
 
-4. **Build Errors**
-   - If you encounter build errors locally, don't worry - Vercel will handle the build process correctly
-   - The local build errors are often due to version mismatches between local and Vercel environments
-   - Vercel automatically manages dependencies and versions during deployment
+4. **Build Errors with Dynamic Routes**
+   - If you encounter errors like "Cannot read properties of undefined", it's usually because dynamic routes ([id].tsx) are trying to access properties of undefined objects during static generation
+   - Make sure to add proper null/undefined checks in your components
+   - Use fallback values in getStaticProps for dynamic routes
+   - Set fallback: 'blocking' in getStaticPaths for better handling of non-pre-rendered paths
 
 ### Checking Deployment Status
 
@@ -137,6 +138,7 @@ After setting the environment variables, you need to redeploy:
 2. **Error Handling**: The frontend now has improved error handling for network issues
 3. **Fallback Data**: The backend provides demo data when the CoinGecko API is not accessible
 4. **CORS Configuration**: The backend is configured to handle CORS properly for various origins
+5. **Dynamic Routes**: For dynamic routes like `/coin/[id]`, always implement proper error handling and fallback mechanisms to prevent build errors
 
 ## Updating Your Deployment
 
@@ -235,3 +237,13 @@ If you encounter build issues locally:
 2. Vercel will correctly build and deploy your application using its own environment
 3. If you still have issues on Vercel, check the deployment logs for specific error messages
 4. Make sure all dependencies are properly listed in `package.json` files
+
+### Dynamic Routes Best Practices
+
+For dynamic routes like `/coin/[id]`:
+
+1. Always implement proper error handling in components
+2. Use fallback values in getStaticProps
+3. Implement null/undefined checks before accessing object properties
+4. Set fallback: 'blocking' in getStaticPaths for better handling
+5. Provide meaningful error messages to users when data is not available

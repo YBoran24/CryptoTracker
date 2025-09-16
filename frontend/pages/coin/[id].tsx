@@ -10,13 +10,14 @@ import { useAuth } from '@/context/AuthContext';
 
 interface CoinDetailsProps {
   initialCoin: Coin;
+  initialChartData?: any[];
 }
 
-export default function CoinDetails({ initialCoin }: CoinDetailsProps) {
+export default function CoinDetails({ initialCoin, initialChartData }: CoinDetailsProps) {
   const router = useRouter();
   const { isAuthenticated } = useAuth();
   const [coin, setCoin] = useState<Coin>(initialCoin);
-  const [chartData, setChartData] = useState<any[]>([]);
+  const [chartData, setChartData] = useState<any[]>(initialChartData || []);
   const [loading, setLoading] = useState(false);
   const [showPortfolioForm, setShowPortfolioForm] = useState(false);
   const [portfolioData, setPortfolioData] = useState({
@@ -165,6 +166,24 @@ export default function CoinDetails({ initialCoin }: CoinDetailsProps) {
     );
   }
 
+  // Check if coin data is available
+  if (!coin || !coin.id) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Kripto Para Bulunamadı</h1>
+          <p className="text-gray-600 dark:text-gray-400 mb-6">İstenen kripto para bilgisi bulunamadı.</p>
+          <button 
+            onClick={() => router.push('/coins')}
+            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+          >
+            Tüm Kripto Paralara Dön
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <Navbar />
@@ -193,7 +212,7 @@ export default function CoinDetails({ initialCoin }: CoinDetailsProps) {
                   </label>
                   <div className="flex items-center">
                     <img className="h-8 w-8 rounded-full mr-2" src={coin.image} alt={coin.name} />
-                    <span className="text-gray-900 dark:text-white">{coin.name} ({coin.symbol.toUpperCase()})</span>
+                    <span className="text-gray-900 dark:text-white">{coin.name} ({coin.symbol?.toUpperCase()})</span>
                   </div>
                 </div>
                 
@@ -264,15 +283,19 @@ export default function CoinDetails({ initialCoin }: CoinDetailsProps) {
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-8">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
             <div className="flex items-center mb-4 md:mb-0">
-              <img className="h-16 w-16 rounded-full" src={coin.image} alt={coin.name} />
+              {coin.image && (
+                <img className="h-16 w-16 rounded-full" src={coin.image} alt={coin.name} />
+              )}
               <div className="ml-4">
-                <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{coin.name}</h1>
-                <p className="text-gray-500 dark:text-gray-400">{coin.symbol.toUpperCase()}</p>
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{coin.name || 'N/A'}</h1>
+                <p className="text-gray-500 dark:text-gray-400">{coin.symbol?.toUpperCase() || 'N/A'}</p>
               </div>
             </div>
             
             <div className="text-right">
-              <p className="text-3xl font-bold text-gray-900 dark:text-white">{formatCurrency(coin.current_price)}</p>
+              <p className="text-3xl font-bold text-gray-900 dark:text-white">
+                {formatCurrency(coin.current_price)}
+              </p>
               <p className={`text-lg ${getPercentageColor(coin.price_change_percentage_24h)}`}>
                 {formatPercentage(coin.price_change_percentage_24h)}
               </p>
@@ -365,8 +388,8 @@ export const getStaticPaths: GetStaticPaths = async () => {
   ];
 
   // We'll pre-render only these paths at build time.
-  // { fallback: true } means other routes will be rendered on-demand
-  return { paths, fallback: true };
+  // { fallback: 'blocking' } means other routes will be rendered on-demand
+  return { paths, fallback: 'blocking' };
 };
 
 // This also gets called at build time
@@ -375,27 +398,66 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
     // Get coin data based on the id
     const coinId = params?.id as string;
     
-    // For initial render, we'll use mock data
-    // In a real implementation, you might want to fetch real data here as well
-    const mockCoin: Coin = {
-      id: coinId,
-      symbol: coinId.slice(0, 3),
-      name: coinId.charAt(0).toUpperCase() + coinId.slice(1),
-      image: `https://assets.coingecko.com/coins/images/1/large/bitcoin.png?1547033579`,
-      current_price: 0,
-      price_change_percentage_24h: 0,
-      market_cap: 0,
-      total_volume: 0
-    };
-
-    // Pass coin data to the page via props
-    return {
-      props: {
-        initialCoin: mockCoin,
-      },
-      revalidate: 60, // Revalidate at most once every 60 seconds
-    };
+    // Try to fetch real data from the API
+    try {
+      const response = await coinsAPI.getCoinById(coinId);
+      
+      // Process the API response
+      const coinData: Coin = {
+        id: response.data.id || coinId,
+        symbol: response.data.symbol || '',
+        name: response.data.name || coinId.charAt(0).toUpperCase() + coinId.slice(1),
+        image: response.data.image || '',
+        current_price: response.data.current_price !== undefined ? response.data.current_price : 0,
+        price_change_percentage_24h: response.data.price_change_percentage_24h || 0,
+        market_cap: response.data.market_cap || 0,
+        total_volume: response.data.total_volume || 0
+      };
+      
+      // Process chart data if available
+      let chartData: any[] = [];
+      if (response.data.market_chart && response.data.market_chart.prices) {
+        chartData = response.data.market_chart.prices.map((price: any) => ({
+          time: new Date(price[0]).toLocaleTimeString('tr-TR', { 
+            hour: '2-digit', 
+            minute: '2-digit' 
+          }),
+          price: price[1]
+        }));
+      }
+      
+      return {
+        props: {
+          initialCoin: coinData,
+          initialChartData: chartData,
+        },
+        revalidate: 60, // Revalidate at most once every 60 seconds
+      };
+    } catch (apiError) {
+      // If API fails, use fallback mock data
+      console.warn('API request failed, using fallback data:', apiError);
+      
+      const mockCoin: Coin = {
+        id: coinId,
+        symbol: coinId.slice(0, 3),
+        name: coinId.charAt(0).toUpperCase() + coinId.slice(1),
+        image: `https://assets.coingecko.com/coins/images/1/large/bitcoin.png?1547033579`,
+        current_price: 0,
+        price_change_percentage_24h: 0,
+        market_cap: 0,
+        total_volume: 0
+      };
+      
+      return {
+        props: {
+          initialCoin: mockCoin,
+          initialChartData: [],
+        },
+        revalidate: 60,
+      };
+    }
   } catch (error) {
+    console.error('Error in getStaticProps:', error);
     return {
       notFound: true,
     };
@@ -408,12 +470,14 @@ const CustomTooltip = ({ active, payload, label, coin }: any) => {
     return (
       <div className="bg-gray-800 border border-gray-700 p-3 rounded-lg shadow-lg">
         <div className="flex items-center mb-2">
-          <img 
-            src={coin.image} 
-            alt={coin.name} 
-            className="w-6 h-6 mr-2 rounded-full"
-          />
-          <p className="text-white font-medium">{coin.name}</p>
+          {coin.image && (
+            <img 
+              src={coin.image} 
+              alt={coin.name} 
+              className="w-6 h-6 mr-2 rounded-full"
+            />
+          )}
+          <p className="text-white font-medium">{coin.name || 'N/A'}</p>
         </div>
         <p className="text-gray-300">
           {`${label} : ${new Intl.NumberFormat('tr-TR', {
