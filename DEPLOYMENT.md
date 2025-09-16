@@ -40,11 +40,29 @@ npm run dev
 
 ### Deploying to Render (Recommended)
 
+#### Option 1: Using Docker (Recommended)
+
 1. Create an account at [Render](https://render.com)
 2. Create a new Web Service
 3. Connect your GitHub repository
 4. Set the following values:
-   - Build command: `npm install && npm run build`
+   - Build command: `npm install`
+   - Start command: `npm start`
+   - Environment variables:
+     ```env
+     DATABASE_URL=sqlite:./cryptotracker.db
+     JWT_SECRET=your_production_jwt_secret_here
+     FRONTEND_URL=https://your-frontend-url.vercel.app
+     ```
+
+#### Option 2: Without Docker
+
+1. Create an account at [Render](https://render.com)
+2. Create a new Web Service
+3. Connect your GitHub repository
+4. Set the following values:
+   - Runtime: Node
+   - Build command: `npm install`
    - Start command: `npm start`
    - Environment variables:
      ```env
@@ -71,7 +89,7 @@ heroku create your-app-name
 ```bash
 heroku config:set DATABASE_URL=sqlite:./cryptotracker.db
 heroku config:set JWT_SECRET=your_production_jwt_secret_here
-heroku config:set FRONTEND_URL=https://your-frontend-url.vercel.app
+heroku config:set FRONTEND_URL=https://your-frontend.vercel.app
 ```
 
 6. Deploy:
@@ -132,6 +150,19 @@ The application creates the following tables:
 2. **favorites** - Stores user's favorite cryptocurrencies
 3. **portfolio** - Stores user's cryptocurrency portfolio
 
+## Docker Support
+
+The application includes Docker support for local development and deployment:
+
+1. Build and run with Docker Compose:
+```bash
+docker-compose up --build
+```
+
+2. Access the application:
+   - Frontend: http://localhost:3000
+   - Backend API: http://localhost:5000/api
+
 ## Troubleshooting
 
 ### Common Issues
@@ -148,6 +179,11 @@ The application creates the following tables:
 3. **Database Connection Issues**
    - Ensure DATABASE_URL is correctly set
    - Check that the database file is accessible (for SQLite)
+
+4. **Docker Build Issues**
+   - Make sure Dockerfile exists in the project root
+   - Check that .dockerignore is properly configured
+   - Verify that all necessary files are included in the build context
 
 ### Checking Deployment Status
 
