@@ -11,3 +11,5 @@ services:
         sync: false  # This will need to be set manually in the Render dashboard
       - key: FRONTEND_URL
         sync: false  # This will need to be set manually in the Render dashboard
+      - key: PORT
+        value: 10000

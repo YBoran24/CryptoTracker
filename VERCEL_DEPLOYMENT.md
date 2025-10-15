@@ -18,20 +18,63 @@ After deploying your backend, note down the public URL. It should look something
 https://your-backend-app.onrender.com
 ```
 
-### 2. Configure Environment Variables in Vercel
-
-When deploying to Vercel, you need to set the environment variables:
+To deploy the backend separately:
 
 1. Go to your Vercel dashboard
-2. Select your project
+2. Click "New Project"
+3. Import your repository
+4. When configuring the project:
+   - Set the "Root Directory" to `backend`
+   - Framework Preset should be "Other"
+5. Add the required environment variables in the Vercel dashboard:
+   - `DATABASE_URL` - Your database connection string
+   - `JWT_SECRET` - Your JWT secret key
+   - `FRONTEND_URL` - Your frontend Vercel URL (e.g., `https://your-frontend-app.vercel.app`)
+6. Deploy the backend
+
+### 2. Configure Environment Variables in Vercel for Backend
+
+When deploying the backend to Vercel, you need to set the environment variables:
+
+1. Go to your Vercel dashboard
+2. Select your backend project
+3. Go to Settings > Environment Variables
+4. Add the following environment variables:
+
+```
+DATABASE_URL=your_database_connection_string
+JWT_SECRET=your_jwt_secret_key
+FRONTEND_URL=https://your-frontend-app.vercel.app
+COINGECKO_API_KEY=your_coingecko_api_key (optional)
+```
+
+### 3. Deploy Frontend to Vercel
+
+After deploying the backend:
+
+1. Go to your Vercel dashboard
+2. Click "New Project"
+3. Import your repository
+4. When configuring the project:
+   - Set the "Root Directory" to `frontend`
+   - Framework Preset should be "Next.js"
+5. Add the required environment variables in the Vercel dashboard:
+   - `BACKEND_URL` - Your deployed backend URL (e.g., `https://your-backend-app.vercel.app`)
+
+### 4. Configure Environment Variables in Vercel for Frontend
+
+When deploying the frontend to Vercel, you need to set the environment variables:
+
+1. Go to your Vercel dashboard
+2. Select your frontend project
 3. Go to Settings > Environment Variables
 4. Add the following environment variable:
 
 ```
-BACKEND_URL=https://your-backend-app.onrender.com
+BACKEND_URL=https://your-backend-app.vercel.app
 ```
 
-### 3. Update next.config.js (Already done)
+### 5. Update next.config.js (Already done)
 
 The [next.config.js](file:///c:/Users/erenc/CryptoTracker/frontend/next.config.js) file has been updated to properly handle the BACKEND_URL environment variable:
 
@@ -48,45 +91,11 @@ const nextConfig = {
 module.exports = nextConfig
 ```
 
-### 4. Deploy Using Vercel CLI
+### 6. Redeploy Both Applications
 
-1. Install Vercel CLI if you haven't already:
-```bash
-npm install -g vercel
-```
+After setting the environment variables, you need to redeploy both applications:
 
-2. Navigate to the project root directory (not the frontend directory):
-```bash
-cd ..
-```
-
-3. Deploy to Vercel:
-```bash
-vercel
-```
-
-4. Follow the prompts:
-   - Set the project name
-   - Select the framework (Next.js)
-   - When asked for the "What is the main directory of your project?", enter `frontend`
-   - Configure environment variables when prompted
-
-### 5. Set Environment Variables in Vercel Dashboard
-
-After the initial deployment:
-
-1. Go to your Vercel project dashboard
-2. Click on "Settings" tab
-3. Click on "Environment Variables" in the left sidebar
-4. Add the following variable:
-   - Name: `BACKEND_URL`
-   - Value: Your deployed backend URL (e.g., `https://your-backend-app.onrender.com`)
-
-### 6. Redeploy
-
-After setting the environment variables, you need to redeploy:
-
-1. Go to the "Deployments" tab
+1. Go to the "Deployments" tab for each project
 2. Click on the "..." menu for the latest deployment
 3. Select "Redeploy"
 
@@ -175,9 +184,6 @@ The root directory includes a [vercel.json](file:///c:/Users/erenc/CryptoTracker
       "dest": "frontend/$1"
     }
   ],
-  "env": {
-    "BACKEND_URL": "https://your-backend-url.com"
-  },
   "github": {
     "silent": true
   },
@@ -209,7 +215,10 @@ The backend directory also includes a [vercel.json](file:///c:/Users/erenc/Crypt
       "src": "/(.*)",
       "dest": "dist/server.js"
     }
-  ]
+  ],
+  "env": {
+    "NODE_ENV": "production"
+  }
 }
 ```
 

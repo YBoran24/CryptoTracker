@@ -22,7 +22,7 @@ const corsOptions = {
     const allowedOrigins = [
       'http://localhost:3000',
       'http://localhost:3001',
-      'https://crypto-tracker-ashy-two.vercel.app', // Fixed Vercel domain with https
+      'https://crypto-tracker-ashy-two.vercel.app',
       process.env.FRONTEND_URL // From environment variable
     ].filter(Boolean); // Remove any falsy values
     
@@ -76,6 +76,20 @@ app.get('/health', (req, res) => {
 // Start server
 // Use PORT environment variable provided by container platform, fallback to 5003
 const PORT = parseInt(process.env.PORT || '5003', 10);
+
+// Handle EADDRINUSE error gracefully
+server.on('error', (e: any) => {
+  if (e.code === 'EADDRINUSE') {
+    console.log(`Port ${PORT} is already in use. Trying with PORT+1...`);
+    server.listen(PORT + 1, '0.0.0.0', () => {
+      console.log(`Server is running on port ${PORT + 1}`);
+      console.log(`API endpoints available at http://0.0.0.0:${PORT + 1}/api`);
+    });
+  } else {
+    console.error(e);
+  }
+});
+
 server.listen(PORT, '0.0.0.0', () => {
   console.log(`Server is running on port ${PORT}`);
   console.log(`API endpoints available at http://0.0.0.0:${PORT}/api`);
