@@ -35,7 +35,6 @@ NEXT_PUBLIC_API_URL=https://your-backend-service.onrender.com/api
 DATABASE_URL=sqlite:./cryptotracker.db
 JWT_SECRET=your_jwt_secret_key_change_this_in_production
 FRONTEND_URL=https://your-frontend-service.onrender.com
-PORT=10000
 ```
 
 Note: Replace `your-backend-service.onrender.com` and `your-frontend-service.onrender.com` with your actual service URLs after deployment.
@@ -44,7 +43,7 @@ Note: Replace `your-backend-service.onrender.com` and `your-frontend-service.onr
 
 In the "Advanced" section, you can also specify custom port settings if needed:
 - For backend: Set the internal port to 10000
-- For frontend: Set the internal port to 3000 (or let Render auto-detect)
+- For frontend: Set the internal port to 3000
 
 Render will automatically set the PORT environment variable, and our application is configured to use this variable.
 
@@ -63,7 +62,7 @@ Click "Create Web Service" to start the deployment process.
 2. **Port in use errors (EADDRINUSE)**:
    - The application is now configured to use the PORT environment variable provided by Render
    - Make sure you're not hardcoding ports in your application
-   - If deploying frontend and backend separately, ensure they use different ports
+   - Frontend uses port 3000, backend uses port 10000
    - If the error persists, the application will automatically try PORT+1
 
 3. **Missing files during build**:

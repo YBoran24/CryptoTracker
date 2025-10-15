@@ -13,3 +13,13 @@ services:
         sync: false  # This will need to be set manually in the Render dashboard
       - key: PORT
         value: 10000
+  - type: web
+    name: cryptotracker-frontend
+    env: node
+    buildCommand: npm install
+    startCommand: npm run build && npm run start
+    envVars:
+      - key: PORT
+        value: 3000
+      - key: BACKEND_URL
+        sync: false  # This will need to be set manually in the Render dashboard

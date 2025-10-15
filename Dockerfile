@@ -37,7 +37,7 @@ WORKDIR /app/backend
 RUN npm ci --only=production
 
 # Expose ports - these are the default ports, but the app will use PORT env var
-EXPOSE 3000 5003
+EXPOSE 3000 10000
 
 # Start both applications
 CMD ["sh", "-c", "cd /app/backend && npm start & cd /app/frontend && npm start"]
