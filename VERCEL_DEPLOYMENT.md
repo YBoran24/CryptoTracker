@@ -59,7 +59,7 @@ After deploying the backend:
    - Set the "Root Directory" to `frontend`
    - Framework Preset should be "Next.js"
 5. Add the required environment variables in the Vercel dashboard:
-   - `BACKEND_URL` - Your deployed backend URL (e.g., `https://your-backend-app.vercel.app`)
+   - `BACKEND_URL` - Your deployed backend URL (e.g., `https://your-backend-app.onrender.com`)
 
 ### 4. Configure Environment Variables in Vercel for Frontend
 
@@ -71,7 +71,7 @@ When deploying the frontend to Vercel, you need to set the environment variables
 4. Add the following environment variable:
 
 ```
-BACKEND_URL=https://your-backend-app.vercel.app
+BACKEND_URL=https://your-backend-app.onrender.com
 ```
 
 ### 5. Update next.config.js (Already done)
@@ -260,3 +260,13 @@ For dynamic routes like `/coin/[id]`:
 5. Provide meaningful error messages to users when data is not available
 6. For complex dynamic routes that require real-time data, consider using client-side fetching instead of static generation
 7. Return minimal data in getStaticProps and fetch detailed data on the client side
+
+### API Connection Troubleshooting
+
+If you're experiencing API connection issues:
+
+1. Verify that your `BACKEND_URL` environment variable is correctly set in Vercel
+2. Ensure your backend service is running and accessible
+3. Check that CORS is properly configured in your backend to allow requests from your Vercel domain
+4. Test the API endpoints directly using a tool like Postman or curl
+5. Check the browser's developer console for any network errors or CORS-related messages

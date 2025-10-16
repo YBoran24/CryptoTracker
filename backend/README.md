@@ -8,7 +8,7 @@ This is the backend API for the CryptoTracker application, built with Node.js, E
 - Real-time cryptocurrency price updates with Socket.IO
 - RESTful API for cryptocurrency data
 - User portfolio and favorites management
-- PostgreSQL database integration
+- SQLite database integration (can be configured for PostgreSQL)
 
 ## Tech Stack
 
@@ -16,7 +16,7 @@ This is the backend API for the CryptoTracker application, built with Node.js, E
 - **Express** - Web framework
 - **TypeScript** - Typed superset of JavaScript
 - **Socket.IO** - Real-time communication
-- **PostgreSQL** - Database
+- **SQLite** - Database (default, can be configured for PostgreSQL)
 - **JWT** - Authentication
 
 ## Getting Started
@@ -44,6 +44,21 @@ This is the backend API for the CryptoTracker application, built with Node.js, E
    npm start
    ```
 
+## Environment Variables
+
+The following environment variables should be set:
+
+```
+DATABASE_URL=sqlite:./cryptotracker.db
+JWT_SECRET=your_jwt_secret_key_change_this_in_production
+FRONTEND_URL=https://your-frontend-service.onrender.com
+```
+
+For Render deployment, you should also set:
+```
+PORT=10000
+```
+
 ## API Endpoints
 
 ### Authentication
@@ -69,8 +84,12 @@ The application uses Socket.IO for real-time price updates. Clients can connect 
 
 ## Database
 
-The application uses PostgreSQL for storing user data, portfolios, and favorites.
+The application uses SQLite for storing user data, portfolios, and favorites. This can be configured to use PostgreSQL for production deployments.
+
+## CORS Configuration
+
+The backend is configured to accept requests from the frontend URL specified in the `FRONTEND_URL` environment variable. For Vercel deployments, you may need to add your Vercel domain to the allowed origins.
 
 ## Deployment
 
-The backend can be deployed to services like Render or Heroku.
+The backend can be deployed to services like Render or Heroku. For Render deployment, make sure to set the required environment variables and use the Dockerfile in the root directory.

@@ -2,7 +2,9 @@ import axios from 'axios';
 
 // Create axios instance with default config
 const api = axios.create({
-  baseURL: process.env.BACKEND_URL ? `${process.env.BACKEND_URL}/api` : 'http://localhost:5003/api',
+  baseURL: process.env.NEXT_PUBLIC_API_URL || process.env.BACKEND_URL 
+    ? `${process.env.BACKEND_URL}/api` 
+    : 'http://localhost:5003/api',
   timeout: 15000, // Increased timeout
   headers: {
     'Content-Type': 'application/json',

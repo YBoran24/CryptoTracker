@@ -35,6 +35,7 @@ NEXT_PUBLIC_API_URL=https://your-backend-service.onrender.com/api
 DATABASE_URL=sqlite:./cryptotracker.db
 JWT_SECRET=your_jwt_secret_key_change_this_in_production
 FRONTEND_URL=https://your-frontend-service.onrender.com
+PORT=10000
 ```
 
 Note: Replace `your-backend-service.onrender.com` and `your-frontend-service.onrender.com` with your actual service URLs after deployment.
@@ -76,6 +77,10 @@ Click "Create Web Service" to start the deployment process.
 5. **CORS errors**:
    - Ensure `FRONTEND_URL` environment variable is set correctly in your backend
    - The backend is configured to accept requests from the frontend URL
+
+6. **API Connection Issues**:
+   - Make sure `NEXT_PUBLIC_API_URL` is set correctly in your frontend environment variables
+   - For Vercel deployments, use `BACKEND_URL` instead of `NEXT_PUBLIC_API_URL`
 
 ## Post-Deployment Steps
 

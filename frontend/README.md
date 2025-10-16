@@ -42,6 +42,19 @@ This is the frontend for the CryptoTracker application, built with Next.js, Type
    npm start
    ```
 
+## Environment Variables
+
+Create a `.env.local` file in the frontend directory with the following variables:
+
+```
+BACKEND_URL=https://your-backend-service.onrender.com
+```
+
+For Render deployment, you should also set:
+```
+NEXT_PUBLIC_API_URL=https://your-backend-service.onrender.com/api
+```
+
 ## Project Structure
 
 ```
@@ -71,8 +84,11 @@ The application uses Tailwind CSS for styling with a dark mode option. The theme
 
 ## API Integration
 
-The frontend connects to the backend API at `http://localhost:5000` by default. This can be configured in the `next.config.js` file.
+The frontend connects to the backend API. The URL is determined by the following priority:
+1. `NEXT_PUBLIC_API_URL` environment variable (for Render deployment)
+2. `BACKEND_URL` environment variable (for Vercel deployment)
+3. `http://localhost:5003/api` (default for local development)
 
 ## Deployment
 
-The frontend can be deployed to Vercel with a single click.
+The frontend can be deployed to Vercel or Render.
